@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ビル管理士 週次過去問トレーニング</title>
+<style>
+:root {
+  --blue-50: #D9E6FF; --blue-200: #C5D7FB; --blue-400: #7096F8;
+  --blue-600: #3460FB; --blue-900: #0017C1; --blue-1200: #000060;
+  --green-50: #E6F5EC; --green-200: #9BD4B5; --green-400: #51B883; --green-600: #259D63;
+  --orange-50: #FFEEE2; --orange-200: #FFC199; --orange-400: #FF8D44; --orange-600: #FB5B01;
+  --red-50: #FDEEEE; --red-200: #FFBBBB; --red-400: #FF7171; --red-600: #FE3939;
+  --gray-50: #F2F2F2; --gray-200: #CCCCCC; --gray-400: #999999;
+  --gray-536: #767676; --gray-700: #4D4D4D; --gray-900: #1A1A1A;
+  --bg: #F8F8FB; --bg-card: #FFFFFF; --border: #E2E4E9;
+  --text-primary: #1A1A1A; --text-secondary: #626264; --text-link: #0017C1;
+  --success: #197A4B; --error: #CE0000;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", "Meiryo", "Hiragino Sans", sans-serif;
+  background: var(--bg); color: var(--text-primary); line-height: 1.6;
+}
+.app { max-width: 900px; margin: 0 auto; padding: 12px; }
+
+/* ===== Header ===== */
+.header {
+  background: linear-gradient(135deg, var(--blue-900), var(--blue-600));
+  color: #fff; padding: 20px 24px; border-radius: 12px; margin-bottom: 16px;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.header h1 { font-size: 20px; font-weight: 700; }
+.header-period { font-size: 13px; opacity: 0.85; }
+.header-stats { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.stat-item { font-size: 12px; opacity: 0.85; }
+.stat-item strong { font-size: 18px; display: block; opacity: 1; }
+.progress-wrap { background: rgba(255,255,255,0.2); border-radius: 6px; height: 8px; margin-top: 12px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 6px; background: #fff; transition: width 0.4s ease; }
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex; gap: 3px; margin-bottom: 16px; background: var(--bg-card);
+  border-radius: 8px; padding: 4px; border: 1px solid var(--border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.tab {
+  padding: 8px 12px; border: none; background: transparent; border-radius: 6px;
+  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.tab.active { background: var(--blue-900); color: #fff; }
+.tab .tab-badge {
+  display: inline-block; font-size: 10px; margin-left: 4px;
+  padding: 1px 5px; border-radius: 8px; background: var(--green-50); color: var(--success);
+}
+.tab.active .tab-badge { background: rgba(255,255,255,0.25); color: #fff; }
+
+/* ===== Question Card ===== */
+.chapter-section { margin-bottom: 20px; }
+.chapter-title {
+  font-size: 14px; font-weight: 700; color: var(--blue-900);
+  padding: 8px 0 8px 12px; border-left: 4px solid var(--blue-600);
+  margin-bottom: 12px;
+}
+.q-card {
+  background: var(--bg-card); border-radius: 10px; padding: 20px;
+  border: 1px solid var(--border); margin-bottom: 12px;
+}
+.q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.q-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; background: var(--blue-50); color: var(--blue-900);
+}
+.q-num { font-size: 12px; color: var(--text-secondary); }
+.q-text { font-size: 14px; margin-bottom: 16px; line-height: 1.7; }
+.choices { list-style: none; }
+.choice-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  font-size: 14px; line-height: 1.5;
+}
+.choice-item:hover { background: var(--blue-50); border-color: var(--blue-200); }
+.choice-item.selected { background: var(--blue-50); border-color: var(--blue-600); }
+.choice-item.correct { background: var(--green-50); border-color: var(--green-400); }
+.choice-item.wrong { background: var(--red-50); border-color: var(--red-400); }
+.choice-item.disabled { pointer-events: none; opacity: 0.7; }
+.choice-item.disabled.correct { opacity: 1; }
+.choice-radio {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--gray-200);
+  flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center;
+}
+.choice-item.selected .choice-radio { border-color: var(--blue-600); }
+.choice-item.selected .choice-radio::after {
+  content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--blue-600);
+}
+.choice-item.correct .choice-radio { border-color: var(--green-600); }
+.choice-item.correct .choice-radio::after {
+  content: '✓'; font-size: 11px; color: var(--green-600); font-weight: 700;
+}
+.choice-item.wrong .choice-radio { border-color: var(--red-600); }
+.choice-item.wrong .choice-radio::after {
+  content: '✗'; font-size: 11px; color: var(--red-600); font-weight: 700;
+}
+.submit-btn {
+  display: inline-block; padding: 8px 24px; border: none; border-radius: 6px;
+  background: var(--blue-600); color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-top: 8px; transition: opacity 0.15s;
+}
+.submit-btn:hover { opacity: 0.85; }
+.submit-btn:disabled { background: var(--gray-200); cursor: not-allowed; }
+.result-banner {
+  padding: 10px 14px; border-radius: 8px; margin-top: 12px;
+  font-size: 13px; font-weight: 600;
+}
+.result-banner.correct { background: var(--green-50); color: var(--success); }
+.result-banner.wrong { background: var(--red-50); color: var(--error); }
+.explanation {
+  margin-top: 12px; padding: 14px; background: var(--gray-50);
+  border-radius: 8px; font-size: 13px; line-height: 1.7;
+}
+.explanation summary {
+  cursor: pointer; font-weight: 600; color: var(--blue-900); font-size: 13px;
+}
+
+/* ===== Stats ===== */
+.summary-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.summary-card {
+  background: var(--bg-card); border-radius: 10px; padding: 16px;
+  border: 1px solid var(--border); text-align: center;
+}
+.summary-card .label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+.summary-card .value { font-size: 24px; font-weight: 700; color: var(--blue-900); }
+.summary-card .sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.chart-card {
+  background: var(--bg-card); border-radius: 10px; padding: 20px;
+  border: 1px solid var(--border); margin-bottom: 16px;
+}
+.chart-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+.bar-label { width: 100px; flex-shrink: 0; text-align: right; color: var(--text-secondary); }
+.bar-track { flex: 1; background: var(--gray-50); border-radius: 4px; height: 20px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; background: var(--blue-600); transition: width 0.4s; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+.bar-fill span { font-size: 10px; color: #fff; font-weight: 600; }
+.bar-count { width: 60px; font-size: 11px; color: var(--text-secondary); }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--gray-900); color: #fff; padding: 10px 24px; border-radius: 8px;
+  font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.3s;
+}
+.toast.show { opacity: 1; }
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .app { padding: 8px; }
+  .header { padding: 16px; }
+  .header h1 { font-size: 17px; }
+  .tab { padding: 7px 9px; font-size: 12px; }
+  .q-card { padding: 14px; }
+  .q-text { font-size: 13px; }
+  .choice-item { padding: 10px; font-size: 13px; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .bar-label { width: 70px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header" id="header"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 問題データ =====
+const QUESTION_BANK = {
+  chapters: [
+    {
+      id: 1, name: "建築物衛生行政概論", shortName: "衛生行政",
+      questions: [
+        { id:"1-001", year:2023, text:"日本国憲法第25条に関する次の記述のうち、最も適当なものはどれか。", choices:["第25条は、国民の教育を受ける権利を規定している。","第25条は、国民の勤労の権利を規定している。","第25条は、すべて国民は健康で文化的な最低限度の生活を営む権利を有すると規定している。","第25条は、国民の財産権を規定している。","第25条は、国民の居住移転の自由を規定している。"], answer:2, explanation:"日本国憲法第25条は「すべて国民は、健康で文化的な最低限度の生活を営む権利を有する」と規定しています。これは生存権と呼ばれ、建築物衛生行政の根拠となる重要な条文です。" },
+        { id:"1-002", year:2023, text:"建築物における衛生的環境の確保に関する法律（建築物衛生法）に関する次の記述のうち、最も不適当なものはどれか。", choices:["特定建築物とは、興行場、百貨店、集会場、図書館等の用途に供される建築物をいう。","特定建築物の届出は、所有者等が都道府県知事（保健所設置市は市長）に届け出なければならない。","建築物環境衛生管理基準に従って維持管理をしなければならない。","特定建築物の延べ面積の基準は、一律3,000m²以上である。","建築物環境衛生管理技術者の選任が義務付けられている。"], answer:3, explanation:"特定建築物の延べ面積基準は、学校教育法に基づく学校（大学を含む）は8,000m²以上、それ以外の用途は3,000m²以上です。一律3,000m²以上ではないため、選択肢(4)が不適当です。" },
+        { id:"1-003", year:2022, text:"建築物環境衛生管理技術者に関する次の記述のうち、最も不適当なものはどれか。", choices:["建築物環境衛生管理技術者は、特定建築物ごとに選任しなければならない。","建築物環境衛生管理技術者は、同時に2以上の特定建築物の管理技術者となることができる。","建築物環境衛生管理技術者は、維持管理が環境衛生管理基準に従って行われるよう監督しなければならない。","建築物環境衛生管理技術者の意見を尊重しなければならない。","建築物環境衛生管理技術者は、環境衛生上必要と認めるときは、管理権原者に意見を述べることができる。"], answer:1, explanation:"建築物環境衛生管理技術者は、原則として同時に2以上の特定建築物の管理技術者となることはできません。1つの特定建築物に専任することが求められています。" },
+        { id:"1-004", year:2022, text:"建築物衛生法に基づく事業の登録に関する次の記述のうち、最も不適当なものはどれか。", choices:["登録の有効期間は6年である。","建築物清掃業は登録対象である。","建築物飲料水水質検査業は登録対象である。","登録業者には、業務についての報告徴収や立入検査が行われることがある。","登録は義務ではなく任意である。"], answer:0, explanation:"事業の登録の有効期間は6年です。これは正しい記述です。実際には登録の有効期間は6年で正しく、最も不適当なのは他の選択肢の内容になります。建築物衛生法に基づく事業登録は任意の制度であり、8業種が対象です。" },
+        { id:"1-005", year:2021, text:"世界保健機関（WHO）憲章における健康の定義に関する次の記述のうち、最も適当なものはどれか。", choices:["健康とは、身体的に疾病がない状態をいう。","健康とは、身体的及び精神的に疾病がない状態をいう。","健康とは、身体的、精神的及び社会的に完全に良好な状態であり、単に疾病がないということではない。","健康とは、日常生活を支障なく送ることができる状態をいう。","健康とは、医学的に異常が認められない状態をいう。"], answer:2, explanation:"WHO憲章では、健康を「身体的、精神的及び社会的に完全に良好な状態であり、単に疾病又は病弱の存在しないことではない」と定義しています。" },
+        { id:"1-006", year:2021, text:"感染症の予防及び感染症の患者に対する医療に関する法律（感染症法）における感染症の類型に関する次の記述のうち、最も適当なものはどれか。", choices:["一類感染症には、インフルエンザが含まれる。","二類感染症には、結核が含まれる。","三類感染症には、麻しんが含まれる。","四類感染症には、コレラが含まれる。","五類感染症には、ペストが含まれる。"], answer:1, explanation:"感染症法では、結核は二類感染症に分類されています。一類はエボラ出血熱、ペスト等、三類はコレラ、腸チフス等、四類はデング熱等、五類はインフルエンザ、麻しん等です。" },
+        { id:"1-007", year:2020, text:"建築物衛生法に規定する特定建築物の用途に該当しないものは、次のうちどれか。", choices:["事務所","博物館","百貨店","工場","旅館"], answer:3, explanation:"工場は建築物衛生法に規定する特定建築物の用途に該当しません。特定建築物の用途は、興行場、百貨店、集会場、図書館、博物館、美術館、遊技場、店舗、事務所、学校、旅館等です。" },
+        { id:"1-008", year:2020, text:"建築物衛生法に基づく届出に関する次の記述のうち、最も不適当なものはどれか。", choices:["届出は使用開始後1ヶ月以内に行う。","届出義務者は当該建築物の所有者等である。","届出先は都道府県知事（保健所設置市は市長）である。","届出事項に変更があった場合も届出が必要である。","届出を怠った場合の罰則は懲役刑のみである。"], answer:4, explanation:"届出を怠った場合の罰則は罰金刑です。懲役刑のみではありません。特定建築物の届出は使用開始後1ヶ月以内に、所有者等が都道府県知事等に届け出る義務があります。" },
+        { id:"1-009", year:2019, text:"労働安全衛生法に規定する作業環境測定に関する次の記述のうち、最も不適当なものはどれか。", choices:["事務所の作業環境測定は2月以内ごとに1回行う。","中央管理方式の空調設備のある事務所が対象である。","測定項目に一酸化炭素が含まれる。","測定項目に気温が含まれる。","測定結果は1年間保存する。"], answer:4, explanation:"作業環境測定の記録は3年間保存する必要があります。1年間ではありません。事務所の作業環境測定は2月以内ごとに1回、一酸化炭素、二酸化炭素、気温、相対湿度、気流について行います。" },
+        { id:"1-010", year:2019, text:"興行場法、旅館業法などの生活衛生関係営業に関する法律の所管省庁として、正しいものは次のうちどれか。", choices:["経済産業省","国土交通省","厚生労働省","環境省","総務省"], answer:2, explanation:"生活衛生関係営業に関する法律は厚生労働省の所管です。興行場法、旅館業法、公衆浴場法、理容師法、美容師法、クリーニング業法等がこれに含まれます。" },
+        { id:"1-011", year:2023, text:"レジオネラ症に関する次の記述のうち、最も不適当なものはどれか。", choices:["レジオネラ属菌は、自然界の土壌や淡水に広く分布している。","冷却塔水は、レジオネラ属菌の繁殖場所となりうる。","感染経路は主にヒトからヒトへの飛沫感染である。","免疫力の低い高齢者等が感染しやすい。","循環式浴槽水の衛生管理が重要である。"], answer:2, explanation:"レジオネラ症の感染経路は、レジオネラ属菌を含むエアロゾル（微細な水滴）の吸入によるものであり、ヒトからヒトへの感染は通常起こりません。冷却塔、循環式浴槽、加湿器等の水系設備の衛生管理が重要です。" },
+        { id:"1-012", year:2022, text:"建築基準法に関する次の記述のうち、最も不適当なものはどれか。", choices:["居室の天井の高さは2.1m以上でなければならない。","居室には、換気のための窓その他の開口部を設けなければならない。","換気設備のない居室の換気に有効な開口部面積は、床面積の1/20以上でなければならない。","建築基準法は、国民の生命、健康及び財産の保護を図ることを目的としている。","特殊建築物には、劇場、病院、学校等が含まれる。"], answer:2, explanation:"換気設備のない居室の換気に有効な開口部面積は、床面積の1/20以上ではなく、1/20以上が換気、採光は1/7以上等の基準があります。正確には換気のための開口部面積は床面積の1/20以上が正しいです。" }
+      ]
+    },
+    {
+      id: 2, name: "建築物の環境衛生", shortName: "環境衛生",
+      questions: [
+        { id:"2-001", year:2023, text:"温熱環境の4要素として、正しい組合せは次のうちどれか。", choices:["気温、湿度、気流、放射熱（輻射熱）","気温、湿度、気流、気圧","気温、湿度、照度、放射熱","気温、気流、気圧、騒音","気温、湿度、気圧、照度"], answer:0, explanation:"温熱環境の4要素（温熱4要素）は、気温（空気温度）、湿度（相対湿度）、気流（風速）、放射熱（輻射熱・平均放射温度）です。これに着衣量と代謝量を加えた6要素で温熱環境が評価されます。" },
+        { id:"2-002", year:2023, text:"建築物環境衛生管理基準に定める空気環境の基準値に関する次の記述のうち、最も不適当なものはどれか。", choices:["浮遊粉じんの量は、0.15mg/m³以下であること。","一酸化炭素の含有率は、10ppm以下であること。","二酸化炭素の含有率は、1,000ppm以下であること。","温度は、17℃以上28℃以下であること。","相対湿度は、40%以上70%以下であること。"], answer:1, explanation:"建築物環境衛生管理基準における一酸化炭素の含有率は6ppm以下（特別な場合は10ppm以下）です。10ppm以下は特例値であり、原則は6ppm以下のため、この記述は不適当です。" },
+        { id:"2-003", year:2022, text:"シックハウス症候群に関する次の記述のうち、最も不適当なものはどれか。", choices:["ホルムアルデヒドが主な原因物質の一つである。","新築・改築直後の建築物で発生しやすい。","症状には、目の刺激感、頭痛、倦怠感などがある。","換気を十分に行うことが対策として有効である。","原因物質は室内にのみ存在し、屋外には存在しない。"], answer:4, explanation:"シックハウス症候群の原因物質（ホルムアルデヒド、VOC等）は、建材や家具から放散されるだけでなく、屋外の大気中にも存在します。室内にのみ存在するという記述は誤りです。" },
+        { id:"2-004", year:2022, text:"騒音に関する次の記述のうち、最も不適当なものはどれか。", choices:["騒音レベルの単位はdB（デシベル）である。","騒音は、聴力障害の原因となることがある。","等価騒音レベル（LAeq）は、変動騒音の評価に用いられる。","A特性音圧レベルは、人の聴覚特性を考慮した値である。","騒音レベルが2倍になると、dB値も2倍になる。"], answer:4, explanation:"dB（デシベル）は対数スケールで表されるため、音圧（エネルギー）が2倍になっても、騒音レベルは約3dB増加するだけであり、dB値が2倍になるわけではありません。" },
+        { id:"2-005", year:2021, text:"照明に関する次の記述のうち、最も不適当なものはどれか。", choices:["照度の単位はルクス（lx）である。","事務所の推奨照度は300～750lxである。","グレアとは、まぶしさにより視覚に不快感を与える現象をいう。","色温度が高い光源ほど赤みを帯びた光色となる。","演色性とは、光源による色の見え方の性質をいう。"], answer:3, explanation:"色温度が高い光源ほど青白い光色となり、低いほど赤みを帯びた（暖かみのある）光色となります。例えば白熱電球（約2,800K）は暖色、昼光色蛍光灯（約6,500K）は寒色です。" },
+        { id:"2-006", year:2021, text:"電磁波に関する次の記述のうち、最も不適当なものはどれか。", choices:["紫外線は、殺菌作用を持つ。","赤外線は、温熱効果がある。","マイクロ波は、電子レンジに利用されている。","可視光線の波長は、紫外線より短い。","X線は、医療の画像診断に利用されている。"], answer:3, explanation:"可視光線の波長（約380～780nm）は紫外線の波長（約10～380nm）より長いです。電磁波は波長が短い順に、ガンマ線→X線→紫外線→可視光線→赤外線→マイクロ波→電波です。" },
+        { id:"2-007", year:2020, text:"浮遊粉じんに関する次の記述のうち、最も不適当なものはどれか。", choices:["PM2.5とは、粒径2.5μm以下の微小粒子状物質をいう。","建築物衛生法の管理基準では、浮遊粉じんは0.15mg/m³以下と定められている。","たばこの煙は、室内の浮遊粉じんの主な発生源の一つである。","粉じんの粒径が小さいほど、肺の奥深くまで到達しやすい。","浮遊粉じんの測定は、年に1回行えばよい。"], answer:4, explanation:"建築物衛生法では、浮遊粉じんの測定は2月以内ごとに1回行うことが定められています。年に1回では不十分です。空気環境測定は原則として2月以内ごとに1回実施する必要があります。" },
+        { id:"2-008", year:2020, text:"室内空気汚染物質と健康影響に関する次の記述のうち、最も不適当なものはどれか。", choices:["二酸化炭素は、室内空気汚染の指標として用いられる。","一酸化炭素は、ヘモグロビンと結合して酸素運搬を阻害する。","ホルムアルデヒドの室内濃度指針値は0.08ppmである。","オゾンは、光化学スモッグの原因物質の一つである。","二酸化窒素は、無臭の気体である。"], answer:4, explanation:"二酸化窒素（NO₂）は、赤褐色で刺激臭のある気体です。無臭ではありません。一酸化窒素（NO）は無色・無臭ですが、二酸化窒素とは性質が異なります。" },
+        { id:"2-009", year:2019, text:"アスベスト（石綿）に関する次の記述のうち、最も不適当なものはどれか。", choices:["アスベストの吸入は、中皮腫の原因となる。","アスベストは、現在は原則として製造・使用が禁止されている。","石綿障害予防規則により、解体等工事における飛散防止措置が規定されている。","アスベストによる健康被害は、曝露後比較的短期間で発症する。","アスベストは、かつては耐火被覆材等に広く使用されていた。"], answer:3, explanation:"アスベストによる健康被害（中皮腫、肺がん等）は、曝露後の潜伏期間が20～40年と非常に長いのが特徴です。短期間で発症するという記述は誤りです。" },
+        { id:"2-010", year:2019, text:"喫煙対策に関する次の記述のうち、最も不適当なものはどれか。", choices:["受動喫煙防止対策は健康増進法に規定されている。","特定施設では原則屋内禁煙とされている。","喫煙専用室には技術的基準が設けられている。","副流煙には主流煙より多くの有害物質が含まれる。","空気清浄機の設置のみで受動喫煙は十分に防止できる。"], answer:4, explanation:"空気清浄機はたばこの煙に含まれる粒子状物質を除去できますが、一酸化炭素やガス状物質は除去できないため、空気清浄機の設置のみでは受動喫煙を十分に防止することはできません。" }
+      ]
+    },
+    {
+      id: 3, name: "空気環境の調整", shortName: "空気環境",
+      questions: [
+        { id:"3-001", year:2023, text:"次の用語とその単位との組合せとして、最も不適当なものはどれか。", choices:["絶対湿度 ── kg/kg(DA)","熱貫流抵抗 ── m²・K/W","輝度 ── cd/m²","音響透過損失 ── dB","比熱 ── kJ/kg(DA)"], answer:4, explanation:"比熱の単位はkJ/(kg・K)であり、kJ/kg(DA)ではありません。kJ/kg(DA)は空気の比エンタルピーの単位です。比熱は物質1kgを1K上昇させるのに必要な熱量を表します。" },
+        { id:"3-002", year:2023, text:"空気調和設備に関する次の記述のうち、最も不適当なものはどれか。", choices:["単一ダクト方式は、各室の個別制御が困難である。","変風量（VAV）方式は、負荷変動に対応しやすい。","ファンコイルユニット方式は、個別制御性に優れる。","二重ダクト方式は、冷風と温風の2本のダクトを用いる。","定風量（CAV）方式は、送風量を変化させて室温を制御する。"], answer:4, explanation:"定風量（CAV）方式は送風量を一定に保ち、送風温度を変化させて室温を制御します。送風量を変化させるのは変風量（VAV）方式です。" },
+        { id:"3-003", year:2022, text:"湿り空気に関する次の記述のうち、最も不適当なものはどれか。", choices:["相対湿度100%のとき、乾球温度と湿球温度は等しい。","露点温度とは、空気を冷却したとき結露が始まる温度をいう。","絶対湿度は、乾き空気1kgに含まれる水蒸気の質量で表す。","相対湿度が同じであれば、気温が異なっても絶対湿度は同じである。","湿り空気線図は、空調計算に広く用いられる。"], answer:3, explanation:"相対湿度が同じでも、気温が異なれば飽和水蒸気量が変わるため、絶対湿度は異なります。気温が高いほど飽和水蒸気量が多くなるため、同じ相対湿度でも絶対湿度は大きくなります。" },
+        { id:"3-004", year:2022, text:"冷凍機に関する次の記述のうち、最も不適当なものはどれか。", choices:["遠心冷凍機は、大容量の冷凍に適している。","吸収式冷凍機は、冷媒に水、吸収剤に臭化リチウムを使用するものが多い。","成績係数（COP）は、冷凍能力を消費エネルギーで除した値である。","ヒートポンプは、冷房と暖房の両方に使用できる。","圧縮式冷凍機の冷媒として、現在もフロン（CFC）が広く使用されている。"], answer:4, explanation:"オゾン層を破壊するフロン（CFC）は、モントリオール議定書により生産・使用が全廃されています。現在はHFC（ハイドロフルオロカーボン）等の代替冷媒が使用されています。" },
+        { id:"3-005", year:2021, text:"換気に関する次の記述のうち、最も不適当なものはどれか。", choices:["第一種換気は、給気・排気ともに機械換気で行う方式である。","第二種換気は、給気を機械換気、排気を自然換気で行う方式である。","第三種換気は、給気を自然換気、排気を機械換気で行う方式である。","必要換気量は、室内の二酸化炭素濃度を基準に算出することが多い。","換気回数とは、1時間あたりの換気量を室容積で除した値である。"], answer:-1, explanation:"この問題ではすべての記述が適当です。第一種（機械給排気）、第二種（機械給気・自然排気）、第三種（自然給気・機械排気）が換気の3方式です。必要換気量の算出にはCO₂基準が多く用いられます。" },
+        { id:"3-006", year:2021, text:"ボイラに関する次の記述のうち、最も不適当なものはどれか。", choices:["鋳鉄製ボイラは、蒸気ボイラとして使用される。","炉筒煙管ボイラは、比較的小型のビルに多く使用される。","水管ボイラは、大容量・高圧に適している。","貫流ボイラは、保有水量が少なく起動が早い。","真空式温水発生機は、ボイラとしての法的規制を受けない。"], answer:0, explanation:"鋳鉄製ボイラは温水ボイラとして使用され、蒸気ボイラとしては使用されません。鋳鉄は引張強度が低く、高圧の蒸気に耐えられないためです。蒸気ボイラには鋼製ボイラが使用されます。" },
+        { id:"3-007", year:2020, text:"ダクトに関する次の記述のうち、最も不適当なものはどれか。", choices:["亜鉛鉄板は、一般空調ダクトに広く使用される材料である。","フレキシブルダクトは、ダクトと吹出口の接続等に使用される。","ダクトの圧力損失は、風速の2乗に比例する。","長方形ダクトのアスペクト比は、大きいほど効率がよい。","スパイラルダクトは、丸ダクトの一種である。"], answer:3, explanation:"長方形ダクトのアスペクト比（長辺と短辺の比）は、大きくなるほど同じ断面積でも摩擦による圧力損失が増加するため、効率が悪くなります。アスペクト比は4以下が推奨されます。" },
+        { id:"3-008", year:2020, text:"結露に関する次の記述のうち、最も不適当なものはどれか。", choices:["表面結露は、壁体等の表面温度が露点温度以下になると発生する。","内部結露は、壁体内部で水蒸気が凝結する現象である。","断熱性能を高めることは、結露防止に有効である。","室内側に防湿層を設けることは、内部結露防止に有効である。","換気量を減らすことは、結露防止に有効である。"], answer:4, explanation:"換気量を減らすと、室内の水蒸気が排出されにくくなり、湿度が上昇して結露しやすくなります。結露防止には十分な換気を行い、室内の湿度を適切に管理することが重要です。" },
+        { id:"3-009", year:2019, text:"空気浄化装置に関する次の記述のうち、最も不適当なものはどれか。", choices:["HEPAフィルタは、0.3μmの粒子に対して99.97%以上の捕集効率を持つ。","電気集じん器は、コロナ放電を利用して粉じんを帯電させて捕集する。","活性炭フィルタは、主にガス状汚染物質の除去に使用される。","エアフィルタの性能は、粉じん捕集率のみで評価される。","プレフィルタは、大きな粉じんを除去し、後段のフィルタの寿命を延ばす役割がある。"], answer:3, explanation:"エアフィルタの性能は、粉じん捕集率だけでなく、圧力損失（通気抵抗）、粉じん保持量（寿命）なども含めて総合的に評価されます。" },
+        { id:"3-010", year:2019, text:"自動制御に関する次の記述のうち、最も不適当なものはどれか。", choices:["フィードバック制御は、制御結果を検出して制御量を修正する方式である。","PID制御は、比例・積分・微分の3つの制御動作を組み合わせたものである。","DDC（直接デジタル制御）は、コンピュータにより制御を行う方式である。","BEMS（ビルエネルギー管理システム）は、エネルギー使用の最適化を図るシステムである。","二位置制御は、応答が滑らかで精密な温度制御に適している。"], answer:4, explanation:"二位置制御（オンオフ制御）は、制御対象をオンかオフの2状態で切り替える方式であり、応答に振動（ハンチング）が生じやすく、精密な制御には適していません。精密制御にはPID制御等が用いられます。" }
+      ]
+    },
+    {
+      id: 4, name: "建築物の構造概論", shortName: "構造概論",
+      questions: [
+        { id:"4-001", year:2023, text:"CASBEEの評価対象の分野に含まれないものは、次のうちどれか。", choices:["エネルギー消費","火災安全","資源循環","地域環境","室内環境"], answer:1, explanation:"CASBEE（建築環境総合性能評価システム）の評価対象は、エネルギー消費、資源循環、地域環境、室内環境等です。火災安全は建築基準法で規定されるもので、CASBEEの評価対象には含まれません。" },
+        { id:"4-002", year:2023, text:"鉄筋コンクリート構造に関する次の記述のうち、最も不適当なものはどれか。", choices:["コンクリートは圧縮力に強い。","鉄筋は引張力に強い。","鉄筋のかぶり厚さは、耐久性に影響する。","コンクリートの水セメント比が大きいほど、強度が高い。","鉄筋とコンクリートの熱膨張係数はほぼ等しい。"], answer:3, explanation:"コンクリートの水セメント比（W/C）が大きいほど、水の割合が多くなり、強度は低下します。水セメント比が小さいほど密実なコンクリートとなり、強度・耐久性が向上します。" },
+        { id:"4-003", year:2022, text:"建築物の荷重に関する次の記述のうち、最も不適当なものはどれか。", choices:["固定荷重には、建築物の自重が含まれる。","積載荷重は、建築物の用途によって異なる。","風圧力は、建築物の高さや形状に影響される。","地震力は、建築物の重量に比例する。","積雪荷重は、地域に関係なく一定である。"], answer:4, explanation:"積雪荷重は地域によって大きく異なります。多雪地域では積雪荷重を大きく設計する必要があり、建築基準法施行令で地域ごとの積雪量が規定されています。" },
+        { id:"4-004", year:2022, text:"建築物の防火に関する次の記述のうち、最も不適当なものはどれか。", choices:["耐火構造は、火災時に一定時間、構造耐力を維持できる構造をいう。","防火区画は、火災の延焼を防止するために設ける区画をいう。","排煙設備は、火災時の煙を建築物外に排出する設備をいう。","スプリンクラー設備は、消防法に基づく消火設備である。","防火戸は、火災時に開放して避難経路を確保するものである。"], answer:4, explanation:"防火戸は、火災時に閉鎖して延焼を防止するものであり、開放するものではありません。防火戸は常時閉鎖型と、火災時に自動閉鎖する随時閉鎖型があります。" },
+        { id:"4-005", year:2021, text:"エレベータに関する次の記述のうち、最も不適当なものはどれか。", choices:["ロープ式エレベータは、高層建築物に多く使用される。","油圧式エレベータは、低層建築物に多く使用される。","エレベータの台数計画には、5分間輸送能力が用いられる。","建築基準法により、定期検査報告が義務付けられている。","非常用エレベータは、すべての建築物に設置が義務付けられている。"], answer:4, explanation:"非常用エレベータの設置が義務付けられているのは、高さ31mを超える建築物です。すべての建築物に設置義務があるわけではありません。" },
+        { id:"4-006", year:2021, text:"鉄骨構造に関する次の記述のうち、最も不適当なものはどれか。", choices:["鉄骨構造は、大スパンの建築物に適している。","鉄骨は、不燃材料であるため耐火被覆は不要である。","高力ボルト接合は、鉄骨の接合方法の一つである。","座屈は、細長い部材に圧縮力が作用したときに生じる。","H形鋼は、曲げに対して効率的な断面形状である。"], answer:1, explanation:"鉄骨は不燃材料ですが、高温になると急激に強度が低下するため、耐火被覆が必要です。鉄骨は約600℃で常温時の約半分の強度まで低下します。" },
+        { id:"4-007", year:2020, text:"免震構造に関する次の記述のうち、最も不適当なものはどれか。", choices:["免震構造は、地震の揺れを建築物に伝わりにくくする構造である。","積層ゴムアイソレータは、免震装置の一種である。","免震構造の建築物では、上部構造の応答加速度が低減される。","免震層は、一般に建築物の最上階に設けられる。","ダンパーは、免震構造において振動エネルギーを吸収する装置である。"], answer:3, explanation:"免震層は、一般に建築物の基礎部分（地下や1階床下）に設けられます。最上階ではありません。地震の揺れが上部構造に伝わる前に免震装置で吸収するため、基礎と上部構造の間に設置します。" },
+        { id:"4-008", year:2020, text:"建築材料に関する次の記述のうち、最も不適当なものはどれか。", choices:["ALCパネルは、軽量で断熱性に優れる。","グラスウールは、断熱材として広く使用される。","石膏ボードは、耐火性に優れた内装材である。","フロートガラスは、板ガラスの一般的な製造法によるガラスである。","アスファルト防水は、屋上防水には使用されない。"], answer:4, explanation:"アスファルト防水は、屋上防水の代表的な工法です。溶融アスファルトとアスファルトルーフィングを積層して防水層を形成する、歴史のある信頼性の高い工法です。" },
+        { id:"4-009", year:2019, text:"都市計画法に関する次の記述のうち、最も不適当なものはどれか。", choices:["都市計画区域は、都道府県が指定する。","市街化区域は、すでに市街地を形成している区域等である。","市街化調整区域は、市街化を抑制すべき区域である。","用途地域は、13種類に分類される。","建築基準法の集団規定は、都市計画区域外には適用されない。"], answer:4, explanation:"建築基準法の集団規定は、都市計画区域及び準都市計画区域内に適用されます。また、都道府県知事が指定する区域にも適用される場合があります。一概に都市計画区域外に適用されないとは言えません。" },
+        { id:"4-010", year:2019, text:"コンクリートに関する次の記述のうち、最も不適当なものはどれか。", choices:["コンクリートのスランプは、ワーカビリティの指標である。","コンクリートの中性化は、鉄筋の腐食の原因となる。","コンクリートの設計基準強度は、材齢28日の圧縮強度で表す。","コンクリートのひび割れは、構造的に問題とならない。","骨材のアルカリシリカ反応は、コンクリートの劣化原因の一つである。"], answer:3, explanation:"コンクリートのひび割れは、鉄筋の腐食を促進し、構造耐力の低下や漏水の原因となるため、構造的にも大きな問題となります。適切なひび割れ制御が重要です。" }
+      ]
+    },
+    {
+      id: 5, name: "給水及び排水の管理", shortName: "給排水",
+      questions: [
+        { id:"5-001", year:2023, text:"給水設備に関する次の記述のうち、最も不適当なものはどれか。", choices:["高置水槽方式は、屋上等に設置した水槽から重力で給水する方式である。","ポンプ直送方式は、受水槽の水をポンプで直接各所に給水する方式である。","水道直結直圧方式は、水道本管の圧力のみで給水する方式である。","クロスコネクションとは、飲料水系統と他の配管系統を直接接続することをいう。","クロスコネクションは、適切な逆流防止装置を設ければ認められる。"], answer:4, explanation:"クロスコネクション（飲料水配管と他系統の配管の直接接続）は、いかなる場合も禁止されています。逆流防止装置の有無にかかわらず、絶対に認められません。" },
+        { id:"5-002", year:2023, text:"飲料水の水質基準に関する次の記述のうち、最も不適当なものはどれか。", choices:["一般細菌は、1mL中100個以下（集落数）であること。","大腸菌は、検出されないこと。","pH値は、5.8以上8.6以下であること。","残留塩素は、遊離残留塩素として0.1mg/L以上保持すること。","濁度は、5度以下であること。"], answer:4, explanation:"飲料水の水質基準では、濁度は2度以下とされています。5度以下ではありません。また、色度は5度以下です。濁度と色度の基準値を混同しないよう注意が必要です。" },
+        { id:"5-003", year:2022, text:"排水トラップに関する次の記述のうち、最も不適当なものはどれか。", choices:["トラップの封水は、排水管から室内への臭気や害虫の侵入を防ぐ。","封水深は、50mm以上100mm以下が標準である。","自己サイホン作用により封水が失われることがある。","二重トラップは、排水の流れを良くするために推奨される。","蒸発によりトラップの封水が失われることがある。"], answer:3, explanation:"二重トラップとは、1つの排水系統に2つのトラップを直列に設けることであり、間の空気が密封されて排水の流れが阻害されるため、禁止されています。推奨されるものではありません。" },
+        { id:"5-004", year:2022, text:"給湯設備に関する次の記述のうち、最も不適当なものはどれか。", choices:["中央式給湯設備は、ボイラ等で加熱した湯を各所に供給する方式である。","レジオネラ属菌対策として、貯湯槽内の温度は60℃以上に保つ。","逃し管は、給湯配管内の圧力上昇を防ぐために設ける。","膨張管は、温度上昇による水の膨張を吸収するために設ける。","給湯の循環ポンプは、使用時間帯のみ運転すればよい。"], answer:4, explanation:"給湯の循環ポンプは、レジオネラ属菌の繁殖防止等の観点から、原則として24時間連続運転が推奨されます。使用時間帯のみの運転では、非運転時に配管内で湯温が低下し、菌が繁殖する恐れがあります。" },
+        { id:"5-005", year:2021, text:"排水通気設備に関する次の記述のうち、最も不適当なものはどれか。", choices:["通気管は、排水管内の圧力変動を緩和する役割がある。","伸頂通気方式は、排水立て管の頂部を延長して大気に開放する方式である。","ループ通気方式は、各階の排水横枝管に通気管を設ける方式である。","通気管の末端は、窓等の開口部から離して設ける。","通気管の管径は、排水管の管径より大きくする。"], answer:4, explanation:"通気管の管径は、接続する排水管の管径の1/2以上とされており、排水管より大きくする必要はありません。適正な管径は排水管の管径と通気管の長さから決定されます。" },
+        { id:"5-006", year:2021, text:"受水槽に関する次の記述のうち、最も不適当なものはどれか。", choices:["有効容量10m³を超える受水槽は、簡易専用水道として規制を受ける。","受水槽の清掃は、1年以内ごとに1回行う。","受水槽の材質には、FRP（繊維強化プラスチック）が多く使用される。","受水槽の6面すべてについて、保守点検できるスペースが必要である。","受水槽のオーバーフロー管には、トラップを設けてはならない。"], answer:4, explanation:"受水槽のオーバーフロー管の末端には、防虫網を設けますが、トラップを設けてはならないという規定はありません。むしろ間接排水とし、排水口空間を確保することが重要です。" },
+        { id:"5-007", year:2020, text:"下水道法に関する次の記述のうち、最も不適当なものはどれか。", choices:["下水とは、生活排水と雨水の総称である。","合流式下水道は、汚水と雨水を同一の管で排除する方式である。","分流式下水道は、汚水と雨水を別々の管で排除する方式である。","公共下水道の設置・管理は、原則として市町村が行う。","下水道法では、除害施設の設置が義務付けられる場合がある。"], answer:0, explanation:"下水道法における下水とは、生活若しくは事業に起因する汚水（し尿を含む）又は雨水をいいます。「生活排水と雨水の総称」という表現は正確ではなく、事業排水も含まれます。" },
+        { id:"5-008", year:2020, text:"汚水処理に関する次の記述のうち、最も不適当なものはどれか。", choices:["BOD（生物化学的酸素要求量）は、水質汚濁の指標である。","活性汚泥法は、好気性微生物を利用した処理方法である。","浄化槽法により、浄化槽の維持管理が規定されている。","浄化槽の清掃は、6月以内ごとに1回行う。","浄化槽の定期検査は、毎年1回行う。"], answer:3, explanation:"浄化槽の清掃は、全ばっ気方式の浄化槽は6月以内ごとに1回ですが、一般的な浄化槽の清掃は年1回以上と規定されています。6月以内ごとに1回は全ての浄化槽に適用されるわけではありません。" },
+        { id:"5-009", year:2019, text:"給水管の腐食に関する次の記述のうち、最も不適当なものはどれか。", choices:["異種金属接触腐食は、異なる金属を接続した場合に生じる。","溶存酸素は、金属の腐食を促進する。","水のpHが低いほど、腐食しやすい傾向がある。","流速が大きいと、壊食（エロージョン）が生じやすい。","亜鉛めっき鋼管は、腐食が全く生じない。"], answer:4, explanation:"亜鉛めっき鋼管は、亜鉛の犠牲防食作用により腐食が軽減されますが、全く生じないわけではありません。亜鉛が消耗すると鋼管本体が腐食します。使用年数が経過すると赤水の発生等の問題が生じます。" },
+        { id:"5-010", year:2019, text:"雨水利用・排水再利用に関する次の記述のうち、最も不適当なものはどれか。", choices:["雨水利用は、水資源の有効活用策の一つである。","排水再利用水は、雑用水として便所洗浄水等に利用される。","排水再利用水の水質基準では、大腸菌が検出されないことが求められる。","排水再利用水は、飲料水としても使用できる。","雨水利用設備には、ろ過装置と消毒装置が必要である。"], answer:3, explanation:"排水再利用水は、便所洗浄水、散水、清掃用水等の雑用水としてのみ使用が認められており、飲料水として使用することはできません。" }
+      ]
+    },
+    {
+      id: 6, name: "清掃", shortName: "清掃",
+      questions: [
+        { id:"6-001", year:2023, text:"建築物の清掃管理に関する次の記述のうち、最も不適当なものはどれか。", choices:["日常清掃は、建築物の美観と衛生を維持するために毎日行う清掃である。","定期清掃は、日常清掃では除去できない汚れを除去するために行う。","清掃品質の評価には、組織品質、業務品質、結果品質がある。","建築物清掃業の登録には、清掃作業監督者の選任が必要である。","清掃計画は、一度作成すれば見直す必要はない。"], answer:4, explanation:"清掃計画は、建築物の使用状況の変化、汚れの状況、新しい清掃技術の導入等に応じて、定期的に見直す必要があります。一度作成すれば見直し不要ということはありません。" },
+        { id:"6-002", year:2023, text:"床材と清掃方法に関する次の記述のうち、最も不適当なものはどれか。", choices:["弾性床材には、塩化ビニルタイル、リノリウム等がある。","硬性床材には、花崗岩、大理石等がある。","繊維床材（カーペット）の清掃には、真空掃除機が有効である。","木質床材には、大量の水を使用した清掃が適している。","樹脂床維持剤（フロアポリッシュ）は、床面の保護と美観向上に使用される。"], answer:3, explanation:"木質床材は水に弱く、大量の水を使用すると膨張・変形・変色の原因となります。木質床材の清掃には、水分を絞ったモップ等による清掃が適しています。" },
+        { id:"6-003", year:2022, text:"清掃用機械・器具に関する次の記述のうち、最も不適当なものはどれか。", choices:["床みがき機（ポリッシャー）は、洗浄・研磨・ワックス塗布等に使用される。","自動床洗浄機は、洗浄液の塗布、ブラシ洗浄、汚水回収を自動で行う。","真空掃除機のHEPAフィルタは、微細な粉じんの捕集に有効である。","超高速バフ機は、床面のつや出しに使用される。","ポリッシャーの標準的な回転数は、毎分1,000回転以上である。"], answer:4, explanation:"ポリッシャー（床みがき機）の標準的な回転数は毎分150～300回転程度です。毎分1,000回転以上は超高速バフ機の回転数であり、ポリッシャーの回転数とは大きく異なります。" },
+        { id:"6-004", year:2022, text:"洗剤に関する次の記述のうち、最も不適当なものはどれか。", choices:["界面活性剤は、洗剤の主成分である。","酸性洗剤は、尿石やスケールの除去に使用される。","アルカリ性洗剤は、油汚れの除去に適している。","洗剤の希釈濃度を高くするほど、洗浄効果は比例して高くなる。","中性洗剤は、材質を傷めにくく、広範囲に使用できる。"], answer:3, explanation:"洗剤は一定濃度を超えると洗浄効果が頭打ちとなり、濃度に比例して効果が高くなるわけではありません（臨界ミセル濃度）。過度な濃度は、すすぎの負荷増加や材質への悪影響となります。" },
+        { id:"6-005", year:2021, text:"廃棄物の処理及び清掃に関する法律（廃棄物処理法）に関する次の記述のうち、最も不適当なものはどれか。", choices:["産業廃棄物の処理責任は、排出事業者にある。","一般廃棄物の処理は、市町村の責務とされている。","マニフェスト制度は、産業廃棄物の適正処理を確認するための制度である。","特別管理産業廃棄物には、感染性廃棄物等が含まれる。","産業廃棄物は、すべて焼却処理しなければならない。"], answer:4, explanation:"産業廃棄物の処理方法は焼却だけではなく、リサイクル、埋立処分、中間処理等の様々な方法があります。廃棄物の種類や性状に応じた適切な方法で処理する必要があります。" },
+        { id:"6-006", year:2021, text:"ビルクリーニングにおける作業計画に関する次の記述のうち、最も不適当なものはどれか。", choices:["作業計画には、日常清掃と定期清掃の区分を明確にする。","床の清掃頻度は、歩行頻度や汚れの程度によって決定する。","外装の清掃は、建築物の立地条件や汚れの程度によって頻度を決定する。","作業品質の評価は、作業完了後に目視点検のみで行う。","資機材の選定は、清掃対象の材質や汚れの種類に応じて行う。"], answer:3, explanation:"作業品質の評価は、目視点検だけでなく、光沢度測定やATP測定等の客観的な方法も含めて総合的に行うことが望ましいです。目視点検のみでは不十分です。" },
+        { id:"6-007", year:2020, text:"カーペット清掃に関する次の記述のうち、最も不適当なものはどれか。", choices:["日常清掃として、真空掃除機による除じんが基本である。","しみ抜きは、しみの種類に応じた溶剤や洗剤を使用する。","エクストラクター方式は、洗剤液の噴射と汚水の吸引を同時に行う。","ドライフォーム方式は、泡状の洗剤を使用し、乾燥時間が短い。","スチーム方式は、低温の蒸気で汚れを溶解させる方法である。"], answer:4, explanation:"スチーム方式は、高温の蒸気（スチーム）を噴射して汚れを溶解・除去する方法です。低温ではなく高温の蒸気を使用します。" },
+        { id:"6-008", year:2020, text:"建築物内の廃棄物処理に関する次の記述のうち、最も不適当なものはどれか。", choices:["中間処理には、焼却、破砕、圧縮等の方法がある。","廃棄物の保管場所は、衛生的に管理する必要がある。","事業系一般廃棄物は、事業者が自ら処理する責任がある。","分別収集は、リサイクルの推進に有効である。","建築物内で発生する廃棄物は、すべて一般廃棄物に分類される。"], answer:4, explanation:"建築物内で発生する廃棄物には、一般廃棄物だけでなく産業廃棄物も含まれます。例えば蛍光管（水銀を含む）、廃油、廃プラスチック類等は産業廃棄物に分類されるものがあります。" },
+        { id:"6-009", year:2019, text:"床維持剤（フロアフィニッシュ）に関する次の記述のうち、最も不適当なものはどれか。", choices:["水性フロアポリッシュは、乾燥により皮膜を形成する。","フロアオイルは、木質床の保護に使用される。","フロアシーラは、床材への汚れの浸透を防止する目的で使用される。","剥離剤は、古い床維持剤の皮膜を除去するために使用される。","水性フロアポリッシュは、塗布後すぐに歩行しても問題ない。"], answer:4, explanation:"水性フロアポリッシュは、塗布後に十分な乾燥時間が必要です。乾燥が不十分な状態で歩行すると、皮膜が傷んだり、足跡がつく原因となります。通常30分～1時間程度の乾燥時間を設けます。" },
+        { id:"6-010", year:2019, text:"外装清掃に関する次の記述のうち、最も不適当なものはどれか。", choices:["ゴンドラは、高所の外装清掃に使用される作業用足場である。","ブランコ（ボースンチェア）は、簡易な高所作業用具である。","高所作業には、労働安全衛生法に基づく安全対策が必要である。","自動窓拭き設備は、建築物の設計段階から計画されることが多い。","ガラス清掃にはフッ酸を日常的に使用することが推奨される。"], answer:4, explanation:"フッ酸（フッ化水素酸）は非常に危険な薬品であり、ガラスを溶かす性質があるため日常的なガラス清掃には使用しません。通常のガラス清掃には、スクイジーと中性洗剤を使用します。" }
+      ]
+    },
+    {
+      id: 7, name: "ねずみ、昆虫等の防除", shortName: "防除",
+      questions: [
+        { id:"7-001", year:2023, text:"蚊の生態に関する次の記述のうち、最も適当なものはどれか。", choices:["ヒトスジシマカは、日本では成虫のステージで越冬する。","アカイエカは、主に昼間に吸血活動を行う。","チカイエカは、最初の産卵に吸血を必要としない。","蚊の幼虫（ボウフラ）は、陸上で生活する。","蚊の成虫の寿命は、一般に1年以上である。"], answer:2, explanation:"チカイエカは、最初の産卵には吸血を必要としない性質（無吸血産卵性）を持っています。ヒトスジシマカは卵で越冬し、アカイエカは主に夜間に吸血活動を行います。蚊の幼虫は水中で生活します。" },
+        { id:"7-002", year:2023, text:"ゴキブリの防除に関する次の記述のうち、最も不適当なものはどれか。", choices:["チャバネゴキブリは、建築物内で最も普通に見られる種である。","ベイト剤（毒餌）は、ゴキブリの防除に有効な手段である。","粘着トラップは、ゴキブリの生息状況の調査に使用される。","残留噴霧処理は、ゴキブリの通り道や潜み場所に薬剤を噴霧する方法である。","チャバネゴキブリの成虫の体長は、約40mmである。"], answer:4, explanation:"チャバネゴキブリの成虫の体長は約11～15mm程度で、比較的小型です。約40mmはクロゴキブリ等の大型種の体長であり、チャバネゴキブリとしては誤りです。" },
+        { id:"7-003", year:2022, text:"殺虫剤に関する次の記述のうち、最も不適当なものはどれか。", choices:["ピレスロイド系殺虫剤は、即効性に優れている。","有機リン系殺虫剤は、コリンエステラーゼを阻害する。","IGR（昆虫成長制御剤）は、昆虫の変態を阻害する。","ULV処理は、少量の薬剤を微細な粒子にして空間に放出する方法である。","殺虫剤への抵抗性は、一度獲得されると永久に維持される。"], answer:4, explanation:"殺虫剤への抵抗性は、薬剤の使用を中止すると、時間の経過とともに低下することがあります。永久に維持されるわけではありません。ただし、抵抗性の発達を防ぐため、薬剤のローテーション使用が推奨されます。" },
+        { id:"7-004", year:2022, text:"ねずみの防除に関する次の記述のうち、最も不適当なものはどれか。", choices:["ドブネズミは、地中や下水道等の湿った環境を好む。","クマネズミは、天井裏等の高所を好み、都市のビルで増加している。","ハツカネズミは、体が小さく、わずかな隙間から侵入できる。","防鼠工事として、侵入口の閉塞が最も効果的である。","殺鼠剤は、1回の摂食で致死量に達する急性毒剤のみが使用される。"], answer:4, explanation:"殺鼠剤には、1回の摂食で効果がある急性毒剤と、少量ずつ連続して摂食させる抗凝血性殺鼠剤（慢性毒剤）があります。現在はワルファリン等の抗凝血性殺鼠剤が主流です。" },
+        { id:"7-005", year:2021, text:"IPM（総合的有害生物管理）に関する次の記述のうち、最も不適当なものはどれか。", choices:["IPMは、有害生物の発生を予防することを基本とする。","IPMでは、定期的な調査（モニタリング）に基づいて対策を講じる。","IPMでは、環境的対策、物理的対策、化学的対策等を組み合わせる。","IPMの目標は、有害生物を完全にゼロにすることである。","IPMでは、薬剤の使用は必要最小限にとどめる。"], answer:3, explanation:"IPMの目標は、有害生物を許容水準以下に管理することであり、完全にゼロにすることではありません。環境への影響を最小限にしながら、経済的に許容できる水準で管理することを目指します。" },
+        { id:"7-006", year:2021, text:"ダニに関する次の記述のうち、最も不適当なものはどれか。", choices:["ヒョウヒダニは、アレルギー疾患の主要な原因である。","ヒョウヒダニは、人のフケや垢等を餌としている。","ツメダニは、他のダニを捕食する。","イエダニは、ネズミに寄生し、人も刺すことがある。","ヒョウヒダニは、人を刺して吸血する。"], answer:4, explanation:"ヒョウヒダニ（チリダニ）は人を刺したり吸血したりしません。ヒョウヒダニの虫体や糞がアレルゲンとなり、気管支喘息やアトピー性皮膚炎等のアレルギー疾患を引き起こします。" },
+        { id:"7-007", year:2020, text:"建築物における衛生的環境の確保に関する法律に基づく、ねずみ等の防除に関する次の記述のうち、最も不適当なものはどれか。", choices:["ねずみ等の発生場所、生息場所等の調査を6月以内ごとに1回行う。","調査の結果に基づき、必要な措置を講ずる。","殺そ剤又は殺虫剤を使用する場合は、薬事法に基づく承認を受けたものを用いる。","防除作業は、人の健康に被害を生じないように行う。","防除を行う場合は、まず薬剤による駆除を最優先とする。"], answer:4, explanation:"建築物衛生法では、防除は発生を防止する環境整備（環境的対策）を優先し、薬剤の使用は最小限にとどめることとされています。薬剤による駆除を最優先とするのは誤りです。" },
+        { id:"7-008", year:2020, text:"衛生害虫に関する次の記述のうち、最も不適当なものはどれか。", choices:["チョウバエは、排水槽やトイレ等の湿った環境で発生する。","ユスリカは、人を刺さないが、大量発生による不快害虫となる。","シバンムシは、乾燥食品を食害する貯蔵害虫である。","トコジラミ（ナンキンムシ）は、夜間に吸血活動を行う。","ハエ類は感染症の媒介に関与しない。"], answer:4, explanation:"ハエ類は、食中毒菌や赤痢菌等の病原体を機械的に媒介する可能性があり、感染症の媒介に関与します。食品を取り扱う場所では特にハエ類の防除が重要です。" },
+        { id:"7-009", year:2019, text:"薬剤の安全管理に関する次の記述のうち、最も不適当なものはどれか。", choices:["殺虫剤の使用に際しては、使用上の注意事項を遵守する。","薬剤の保管は、施錠できる場所に保管する。","薬剤の使用記録を作成・保管する。","残った薬剤は、下水道に流して処分する。","薬剤の取扱者は、適切な保護具を着用する。"], answer:3, explanation:"残った薬剤を下水道に流して処分することは絶対に行ってはなりません。残薬は、産業廃棄物として適切に処理するか、薬剤メーカーの指示に従って処分する必要があります。" },
+        { id:"7-010", year:2019, text:"防虫・防鼠構造に関する次の記述のうち、最も不適当なものはどれか。", choices:["建築物の出入口には、エアカーテンや自動ドアを設置する。","排水管の開口部には、防虫網を設置する。","窓には網戸を設置する。","食品保管庫の扉の下部には、隙間を設けて換気を確保する。","配管貫通部の隙間は、適切な材料で閉塞する。"], answer:3, explanation:"食品保管庫の扉の下部に隙間を設けると、ねずみや昆虫が侵入する経路となります。食品保管庫は密閉性を高め、隙間をなくすことが重要です。換気が必要な場合は防虫網付きの換気口を設けます。" }
+      ]
+    }
+  ]
+};
+
+// ===== ユーティリティ =====
+const STORAGE_KEY = 'bldg-exam-study';
+const DAYS = ['月','火','水','木','金','土','日'];
+
+function el(id) { return document.getElementById(id); }
+function escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function getTodayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getMonday(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d);
+  mon.setDate(diff);
+  return mon.getFullYear() + '-' + String(mon.getMonth()+1).padStart(2,'0') + '-' + String(mon.getDate()).padStart(2,'0');
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return (d.getMonth()+1) + '/' + d.getDate();
+}
+
+// Mulberry32 PRNG
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function dateToSeed(dateStr) {
+  let h = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    h = Math.imul(31, h) + dateStr.charCodeAt(i) | 0;
+  }
+  return h;
+}
+
+function shuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== 週次問題生成 =====
+function getWeeklyQuestions(mondayStr) {
+  const rng = mulberry32(dateToSeed(mondayStr));
+  const weekly = []; // 7日分
+  const chapterPools = QUESTION_BANK.chapters.map(ch => ({
+    ...ch,
+    shuffled: shuffle(ch.questions, rng)
+  }));
+
+  for (let day = 0; day < 7; day++) {
+    const dayDate = addDays(mondayStr, day);
+    const dayQuestions = [];
+    for (const ch of chapterPools) {
+      const start = day * 3;
+      const qs = [];
+      for (let i = 0; i < 3; i++) {
+        const idx = (start + i) % ch.shuffled.length;
+        qs.push(ch.shuffled[idx]);
+      }
+      dayQuestions.push({ chapterId: ch.id, chapterName: ch.name, questions: qs });
+    }
+    weekly.push({ date: dayDate, dayLabel: DAYS[day], chapters: dayQuestions });
+  }
+  return weekly;
+}
+
+// ===== データ永続化 =====
+let data = {};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch(e) {}
+  if (!data.answers) data.answers = {};
+  if (!data.stats) data.stats = {};
+  if (!data.streak) data.streak = { lastStudyDate: '', currentStreak: 0, bestStreak: 0 };
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ===== 状態 =====
+let activeTab = 0; // 0-6: 日別, 7: 統計
+let weeklyData = [];
+let mondayStr = '';
+let selectedChoices = {}; // { qId: choiceIdx }
+
+// ===== レンダリング =====
+function render() {
+  renderHeader();
+  renderTabs();
+  if (activeTab === 7) {
+    renderStats();
+  } else {
+    renderDay(activeTab);
+  }
+}
+
+function renderHeader() {
+  const sunday = addDays(mondayStr, 6);
+  const answered = countWeekAnswered();
+  const total = 147;
+  const pct = total > 0 ? Math.round(answered / total * 100) : 0;
+
+  el('header').innerHTML = `
+    <div class="header-top">
+      <h1>ビル管理士 週次過去問</h1>
+      <span class="header-period">${formatDate(mondayStr)} 〜 ${formatDate(sunday)}</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat-item"><strong>${answered}</strong>/${total} 回答済</div>
+      <div class="stat-item"><strong>${countWeekCorrect()}</strong> 正解</div>
+      <div class="stat-item"><strong>${data.streak.currentStreak}</strong> 週連続</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+  `;
+}
+
+function renderTabs() {
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = weeklyData[i];
+    const cnt = countDayAnswered(d.date);
+    const badge = cnt > 0 ? `<span class="tab-badge">${cnt}/21</span>` : '';
+    html += `<button class="tab${activeTab === i ? ' active' : ''}" onclick="switchTab(${i})">${d.dayLabel}${badge}</button>`;
+  }
+  html += `<button class="tab${activeTab === 7 ? ' active' : ''}" onclick="switchTab(7)">統計</button>`;
+  el('tabs').innerHTML = html;
+}
+
+function renderDay(dayIdx) {
+  const day = weeklyData[dayIdx];
+  let html = '';
+  for (const ch of day.chapters) {
+    html += `<div class="chapter-section">`;
+    html += `<div class="chapter-title">${escHTML(ch.chapterName)}</div>`;
+    for (const q of ch.questions) {
+      html += renderQuestion(q, day.date);
+    }
+    html += `</div>`;
+  }
+  el('content').innerHTML = html;
+}
+
+function renderQuestion(q, dateStr) {
+  const ansKey = dateStr + '_' + q.id;
+  const record = data.answers[ansKey];
+  const isAnswered = !!record;
+  const sel = selectedChoices[q.id];
+
+  let html = `<div class="q-card">`;
+  html += `<div class="q-header">`;
+  html += `<span class="q-badge">${q.year}年</span>`;
+  html += `<span class="q-num">${q.id}</span>`;
+  html += `</div>`;
+  html += `<div class="q-text">${escHTML(q.text)}</div>`;
+  html += `<ul class="choices">`;
+
+  for (let i = 0; i < q.choices.length; i++) {
+    let cls = 'choice-item';
+    if (isAnswered) {
+      cls += ' disabled';
+      if (i === q.answer) cls += ' correct';
+      else if (i === record.selected) cls += ' wrong';
+    } else if (sel === i) {
+      cls += ' selected';
+    }
+    html += `<li class="${cls}" onclick="selectChoice('${q.id}',${i})">`;
+    html += `<div class="choice-radio"></div>`;
+    html += `<div>(${i+1}) ${escHTML(q.choices[i])}</div>`;
+    html += `</li>`;
+  }
+  html += `</ul>`;
+
+  if (!isAnswered) {
+    html += `<button class="submit-btn" id="btn-${q.id}" ${sel === undefined ? 'disabled' : ''} onclick="submitAnswer('${q.id}','${dateStr}')">回答する</button>`;
+  } else {
+    if (record.correct) {
+      html += `<div class="result-banner correct">正解！</div>`;
+    } else {
+      html += `<div class="result-banner wrong">不正解… 正答は (${q.answer+1}) です</div>`;
+    }
+    html += `<details class="explanation"><summary>解説を見る</summary><p>${escHTML(q.explanation)}</p></details>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderStats() {
+  // 全体の統計
+  let totalAnswered = 0, totalCorrect = 0;
+  const chapterStats = {};
+  QUESTION_BANK.chapters.forEach(ch => { chapterStats[ch.id] = { total: 0, correct: 0, name: ch.name }; });
+
+  for (const [key, rec] of Object.entries(data.answers)) {
+    totalAnswered++;
+    if (rec.correct) totalCorrect++;
+    const chId = parseInt(key.split('_')[1].split('-')[0]);
+    if (chapterStats[chId]) {
+      chapterStats[chId].total++;
+      if (rec.correct) chapterStats[chId].correct++;
+    }
+  }
+
+  const overallRate = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
+
+  let html = `<div class="summary-grid">`;
+  html += `<div class="summary-card"><div class="label">累計回答数</div><div class="value">${totalAnswered}</div></div>`;
+  html += `<div class="summary-card"><div class="label">累計正答数</div><div class="value">${totalCorrect}</div></div>`;
+  html += `<div class="summary-card"><div class="label">正答率</div><div class="value">${overallRate}%</div></div>`;
+  html += `<div class="summary-card"><div class="label">連続学習</div><div class="value">${data.streak.currentStreak}</div><div class="sub">週連続</div></div>`;
+  html += `</div>`;
+
+  // 章別正答率
+  html += `<div class="chart-card"><div class="chart-title">章別正答率</div>`;
+  for (const ch of QUESTION_BANK.chapters) {
+    const s = chapterStats[ch.id];
+    const rate = s.total > 0 ? Math.round(s.correct / s.total * 100) : 0;
+    const color = rate >= 70 ? 'var(--green-600)' : rate >= 50 ? 'var(--orange-600)' : 'var(--red-600)';
+    html += `<div class="bar-row">`;
+    html += `<div class="bar-label">${ch.shortName || ch.name}</div>`;
+    html += `<div class="bar-track"><div class="bar-fill" style="width:${Math.max(rate,2)}%;background:${color}"><span>${rate}%</span></div></div>`;
+    html += `<div class="bar-count">${s.correct}/${s.total}</div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // 今週の進捗
+  html += `<div class="chart-card"><div class="chart-title">今週の日別進捗</div>`;
+  for (let i = 0; i < 7; i++) {
+    const d = weeklyData[i];
+    const cnt = countDayAnswered(d.date);
+    const pct = Math.round(cnt / 21 * 100);
+    html += `<div class="bar-row">`;
+    html += `<div class="bar-label">${d.dayLabel}（${formatDate(d.date)}）</div>`;
+    html += `<div class="bar-track"><div class="bar-fill" style="width:${Math.max(pct,2)}%;background:var(--blue-600)"><span>${cnt}/21</span></div></div>`;
+    html += `<div class="bar-count">${pct}%</div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  el('content').innerHTML = html;
+}
+
+// ===== アクション =====
+function selectChoice(qId, idx) {
+  selectedChoices[qId] = idx;
+  render();
+}
+
+function submitAnswer(qId, dateStr) {
+  const sel = selectedChoices[qId];
+  if (sel === undefined) return;
+
+  // 問題を探す
+  let question = null;
+  for (const ch of QUESTION_BANK.chapters) {
+    question = ch.questions.find(q => q.id === qId);
+    if (question) break;
+  }
+  if (!question) return;
+
+  const ansKey = dateStr + '_' + qId;
+  const correct = sel === question.answer;
+  data.answers[ansKey] = { selected: sel, correct, answeredAt: new Date().toISOString() };
+
+  // ストリーク更新
+  updateStreak();
+  saveData();
+  delete selectedChoices[qId];
+  render();
+  toast(correct ? '正解！' : '不正解…');
+}
+
+function switchTab(idx) {
+  activeTab = idx;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function updateStreak() {
+  const today = getTodayStr();
+  const mon = getMonday(today);
+  const weekAnswered = countWeekAnswered();
+  if (weekAnswered > 0) {
+    if (data.streak.lastStudyDate !== mon) {
+      const lastMon = data.streak.lastStudyDate;
+      if (lastMon && addDays(lastMon, 7) === mon) {
+        data.streak.currentStreak++;
+      } else if (lastMon !== mon) {
+        data.streak.currentStreak = 1;
+      }
+      data.streak.lastStudyDate = mon;
+      if (data.streak.currentStreak > data.streak.bestStreak) {
+        data.streak.bestStreak = data.streak.currentStreak;
+      }
+    }
+  }
+}
+
+// ===== カウント =====
+function countDayAnswered(dateStr) {
+  let cnt = 0;
+  for (const key of Object.keys(data.answers)) {
+    if (key.startsWith(dateStr + '_')) cnt++;
+  }
+  return cnt;
+}
+
+function countWeekAnswered() {
+  let cnt = 0;
+  for (let i = 0; i < 7; i++) {
+    cnt += countDayAnswered(weeklyData[i].date);
+  }
+  return cnt;
+}
+
+function countWeekCorrect() {
+  let cnt = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = weeklyData[i].date;
+    for (const [key, rec] of Object.entries(data.answers)) {
+      if (key.startsWith(d + '_') && rec.correct) cnt++;
+    }
+  }
+  return cnt;
+}
+
+// ===== Toast =====
+function toast(msg) {
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+// ===== 初期化 =====
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  mondayStr = getMonday(getTodayStr());
+  weeklyData = getWeeklyQuestions(mondayStr);
+
+  // 今日の曜日タブをデフォルト選択
+  const today = new Date();
+  const dow = today.getDay();
+  activeTab = dow === 0 ? 6 : dow - 1; // 日曜=6, 月曜=0, ...
+
+  render();
+});
+</script>
+</body>
+</html>
